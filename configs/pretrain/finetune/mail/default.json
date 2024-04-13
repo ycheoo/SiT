@@ -5,5 +5,5 @@
     "blr": 1e-6,
     "batch_size": 128,
     "epochs": 50,
-    "finetune": "mail/default/0/checkpoint-0.pth"
+    "finetune": "mail/default/0/checkpoint-60.pth"
 }

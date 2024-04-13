@@ -1,5 +1,5 @@
 #!/bin/bash
-export CUDA_VISIBLE_DEVICES=3,4,5
+export CUDA_VISIBLE_DEVICES=1,2,3
 
 read -p "Are you sure you want to proceed? (y/n) " confirm
 if [ "$confirm" = "y" ]; then

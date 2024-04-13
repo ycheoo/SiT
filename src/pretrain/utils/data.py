@@ -7,14 +7,16 @@ from torchvision.datasets.folder import DatasetFolder
 
 
 def random_crop_resize(sample, crop_minlen, input_size):
-    sample_len = len(sample)
+    if sample.ndim == 1 or sample.shape[0] == 1:
+        sample = np.vstack([sample, sample])
+    sample_len = sample.shape[1]
     crop_size = np.random.randint(crop_minlen, sample_len + 1)
     start_idx = np.random.randint(0, sample_len - crop_size + 1)
-    sample = sample[start_idx : start_idx + crop_size]
+    sample = sample[:, start_idx : start_idx + crop_size]
     if sample_len > input_size:
-        sample = sample[:input_size]
+        sample = sample[:, :input_size]
     sample_padded = np.zeros((input_size), dtype=np.float32)
-    sample_padded[: len(sample)] = sample
+    sample_padded[:, : sample.shape[1]] = sample
     sample = sample_padded
     return sample
 
@@ -45,7 +47,7 @@ class MyFolder(DatasetFolder):
             sample = random_crop_resize(sample, 512, self.input_size)
         else:
             sample = random_crop_resize(sample, len(sample), self.input_size)
-        sample = sample.reshape((1, self.input_size))
+        sample = sample.reshape((2, self.input_size))
         sample = torch.from_numpy(sample)
         target = self.dataset_idx * self.domain_classnum + target
 
