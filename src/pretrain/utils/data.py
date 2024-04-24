@@ -7,15 +7,23 @@ from torchvision.datasets.folder import DatasetFolder
 
 
 def random_crop_resize(sample, crop_minlen, input_size):
+    # support for dual channels
     if sample.ndim == 1 or sample.shape[0] == 1:
         sample = np.vstack([sample, sample])
-    sample_len = sample.shape[1]
-    crop_size = np.random.randint(crop_minlen, sample_len + 1)
-    start_idx = np.random.randint(0, sample_len - crop_size + 1)
+
+    # if sample is too short (less than crop_minlen)
+    if sample.shape[1] < crop_minlen:
+        sample_padded = np.zeros((2, crop_minlen), dtype=np.float32)
+        sample_padded[:, sample.shape[1]] = sample
+        sample = sample_padded
+    
+    # crop
+    crop_size = np.random.randint(crop_minlen, min(input_size, sample.shape[1]) + 1)
+    start_idx = np.random.randint(0, sample.shape[1] - crop_size + 1)
     sample = sample[:, start_idx : start_idx + crop_size]
-    if sample_len > input_size:
-        sample = sample[:, :input_size]
-    sample_padded = np.zeros((input_size), dtype=np.float32)
+
+    # unified shape
+    sample_padded = np.zeros((2, input_size), dtype=np.float32)
     sample_padded[:, : sample.shape[1]] = sample
     sample = sample_padded
     return sample
@@ -46,8 +54,7 @@ class MyFolder(DatasetFolder):
         if self.mode == "train":
             sample = random_crop_resize(sample, 512, self.input_size)
         else:
-            sample = random_crop_resize(sample, len(sample), self.input_size)
-        sample = sample.reshape((2, self.input_size))
+            sample = random_crop_resize(sample, min(len(sample), self.input_size), self.input_size)
         sample = torch.from_numpy(sample)
         target = self.dataset_idx * self.domain_classnum + target
 
@@ -69,15 +76,3 @@ def get_dataset(dataset, domains, input_size):
         test_dset.append(MyFolder(test_dir, "test", input_size))
 
     return ConcatDataset(train_dset), ConcatDataset(test_dset)
-
-
-# def get_relabeled_dataset(domains):
-#     root_dir = '/home/heyuchen/data/signal_raw'
-#     dataset = []
-#     domain_classnum = 8
-#     for dataset_idx, domain in enumerate(domains):
-#         test_dir = os.path.join(root_dir, f'data2023{domain}', 'val')
-#         dataset.append(MyFolder(test_dir,
-#                        dataset_idx, domain_classnum))
-
-#     return ConcatDataset(dataset)

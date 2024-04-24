@@ -1,9 +1,11 @@
 {
     "dataset": "mail",
-    "domains": "0531,0601,0602,0603",
+    "domains": "0531",
     
-    "blr": 1e-6,
-    "batch_size": 128,
+    "blr": 1e-3,
+    "batch_size": 512,
     "epochs": 50,
-    "finetune": "mail/default/0/checkpoint-60.pth"
+    "finetune": "mail/default/0/checkpoint-30.pth",
+
+    "nb_classes": 8
 }

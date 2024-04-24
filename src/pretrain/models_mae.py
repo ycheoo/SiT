@@ -20,7 +20,7 @@ from utils.pos_embed import get_2d_sincos_pos_embed
 
 from timm.models.layers.trace_utils import _assert
 
-class PatchEmbed2D(nn.Module):
+class PatchEmbed1D(nn.Module):
     """ 1D Signal to Patch Embedding
     """
     def __init__(self, img_size=224*224*3, patch_size=16*16*3, in_chans=2, embed_dim=768, norm_layer=None, flatten=True):
@@ -30,7 +30,7 @@ class PatchEmbed2D(nn.Module):
         self.flatten = flatten
         self.num_patches = img_size // patch_size
 
-        self.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
+        self.proj = nn.Conv1d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
         self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
 
     def forward(self, x):
@@ -53,7 +53,7 @@ class MaskedAutoencoderViT(nn.Module):
 
         # --------------------------------------------------------------------------
         # MAE encoder specifics
-        self.patch_embed = PatchEmbed2D(img_size, patch_size, in_chans, embed_dim)
+        self.patch_embed = PatchEmbed1D(img_size, patch_size, in_chans, embed_dim)
         num_patches = self.patch_embed.num_patches
 
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
@@ -117,16 +117,16 @@ class MaskedAutoencoderViT(nn.Module):
 
     def patchify(self, samples):
         """
-        samples: (N, 1, SL)
-        x: (N, L, patch_size)
+        samples: (N, 2, SL)
+        x: (N, L, patch_size * 2)
         """
         p = self.patch_embed.patch_size
         assert samples.shape[2] % p == 0
 
         num = samples.shape[2] // p
-        x = samples.reshape(shape=(samples.shape[0], 1, num, p))
+        x = samples.reshape(shape=(samples.shape[0], 2, num, p))
         x = torch.einsum('ncxp->nxpc', x)
-        x = x.reshape(shape=(samples.shape[0], num, p))
+        x = x.reshape(shape=(samples.shape[0], num, p * 2))
         return x
 
     def random_masking(self, x, mask_ratio):

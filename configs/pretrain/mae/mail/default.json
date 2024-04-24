@@ -1,9 +1,9 @@
 {
     "dataset": "mail",
-    "domains": "0531,0601,0602,0603",
+    "domains": "0531",
     
     "blr": 1.5e-5,
-    "batch_size": 128,
+    "batch_size": 512,
     "epochs": 100,
     "warmup_epochs": 50
 }
