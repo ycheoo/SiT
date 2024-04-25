@@ -3,7 +3,7 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
-from utils.data import iINCSR16, iRADIO38, iRADIO88, iSMI78, iUAV48
+from utils.data import iINCSR16
 
 
 def select(x, y, idx):
@@ -13,15 +13,7 @@ def select(x, y, idx):
 
 def get_idata(dataset):
     name = dataset.lower()
-    if name == "radio88":
-        return iRADIO88()
-    elif name == "radio38":
-        return iRADIO38()
-    elif name == "uav48":
-        return iUAV48()
-    elif name == "smi78":
-        return iSMI78()
-    elif name == "incsr16":
+    if name == "incsr16":
         return iINCSR16()
     else:
         raise NotImplementedError("Unknown dataset {}.".format(dataset))
@@ -147,9 +139,8 @@ class DummyDataset(Dataset):
         path = self.samples[index]
         if not "cifar" in self.dataset:
             sample = np.load(path)
-            crop_minlen = 512 if self.mode == "train" else len(sample)
-            sample = self.random_crop_resize(sample, crop_minlen, 224 * 224 * 3)
-            sample = sample.reshape((1, 224 * 224 * 3))
+            crop_minlen = 512 if self.mode == "train" else min(len(sample), 224*224*3)
+            sample = self.random_crop_resize(sample, crop_minlen, 224*224*3)
             sample = torch.from_numpy(sample)
         else:
             sample = self.trsf(Image.fromarray(path))
@@ -159,13 +150,23 @@ class DummyDataset(Dataset):
         return sample, target
 
     def random_crop_resize(self, sample, crop_minlen, input_size):
-        sample_len = len(sample)
-        crop_size = np.random.randint(crop_minlen, sample_len + 1)
-        start_idx = np.random.randint(0, sample_len - crop_size + 1)
-        sample = sample[start_idx : start_idx + crop_size]
-        if sample_len > input_size:
-            sample = sample[:input_size]
-        sample_padded = np.zeros((input_size), dtype=np.float32)
-        sample_padded[: len(sample)] = sample
+        # support for dual channels
+        if sample.ndim == 1 or sample.shape[0] == 1:
+            sample = np.vstack([sample, sample])
+
+        # if sample is too short (less than crop_minlen)
+        if sample.shape[1] < crop_minlen:
+            sample_padded = np.zeros((2, crop_minlen), dtype=np.float32)
+            sample_padded[:, sample.shape[1]] = sample
+            sample = sample_padded
+        
+        # crop
+        crop_size = np.random.randint(crop_minlen, min(input_size, sample.shape[1]) + 1)
+        start_idx = np.random.randint(0, sample.shape[1] - crop_size + 1)
+        sample = sample[:, start_idx : start_idx + crop_size]
+
+        # unified shape
+        sample_padded = np.zeros((2, input_size), dtype=np.float32)
+        sample_padded[:, : sample.shape[1]] = sample
         sample = sample_padded
         return sample

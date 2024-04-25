@@ -10,9 +10,9 @@ class PatchEmbed1D(nn.Module):
 
     def __init__(
         self,
-        img_size=224 * 224 * 3,
+        img_size=224*224*3,
         patch_size=16 * 16 * 3,
-        in_chans=1,
+        in_chans=2,
         embed_dim=768,
         norm_layer=None,
         flatten=True,
@@ -44,9 +44,9 @@ class PatchEmbed1D(nn.Module):
 class VPT(VisionTransformer):
     def __init__(
         self,
-        img_size=224 * 224 * 3,
+        img_size=224*224*3,
         patch_size=16 * 16 * 3,
-        in_chans=1,
+        in_chans=2,
         num_classes=0,
         embed_dim=768,
         depth=12,

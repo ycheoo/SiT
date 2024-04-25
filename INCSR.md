@@ -6,9 +6,21 @@
 pip install -r requirements.txt
 ```
 
-## [Pretrain](./PRETRAIN.md)
+## Configurations
 
-## [Incsr](./INCSR.md)
+1. **init_cls, inc_cls: initial class number and incremental class number.**
+2. **init_inst, inc_inst, limit_inst: initial sample number, incremental sample number and limitation of samples used for training.**
+3. **base_epoch: epoch for whole training stage (initial incremental training stage), and epoch for single training stage, tuned_epoch = base_epoch // tuned_session.**
+4. **model_backbone_loc: path of pre-trained model to be loaded.**
+
+## Experiments
+
+```
+./scripts/incsr/train_incsr.sh {node} {dataset} {config}
+```
+
+where `{dataset}` should be chosen from the name of subfolders from `configs/pretrain/mae` 
+and `{config}` should be chosen from be selected from the json file in the specific subfolder.
 
 ## Datasets
 

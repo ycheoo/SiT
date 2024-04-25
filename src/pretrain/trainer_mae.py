@@ -113,7 +113,7 @@ def train(args):
             log_writer=log_writer,
             args=args,
         )
-        if args.output_dir and (epoch % 30 == 0 or epoch + 1 == args.epochs):
+        if args.output_dir and (epoch % 10 == 0 or epoch + 1 == args.epochs):
             misc.save_model(
                 args=args,
                 model=model,

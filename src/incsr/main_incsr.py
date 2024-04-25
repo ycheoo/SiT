@@ -1,23 +1,37 @@
+import os
 import argparse
-import json
 
 from torch.distributed import destroy_process_group
 from trainer_incsr import train
-from utils.misc import init_distributed_mode
-
-domains = "0531,0601,0602,0603,0605,0606,0607"
-
+from utils.misc import init_distributed_mode, load_json
+import setproctitle
 
 def main():
-    args = get_args()
+    args = setup_parser().parse_args()
+    config_param = load_json(
+        os.path.join(
+            "./configs", "incsr", args.dataset, f"{args.config}.json"
+        )
+    )
+    args = vars(args)
+    args.update(config_param)
+    args = argparse.Namespace(**args)
+
+    setproctitle.setproctitle(
+        "{}_{}_{}".format("INCSR", args.dataset, args.config)
+    )
+    args.log_dir = f"./logs/incsr/{args.dataset}/{args.config}"
+    args.result_dir = (
+        f"./results/incsr/{args.dataset}/{args.config}"
+    )
+    args.model_backbone_loc = f"./checkpoints/pretrain/{args.model_backbone_loc}"
+    
     init_distributed_mode(args)
-    if args.config is not None:
-        print(f"use json file config: {args.config}")
     train(args)
     destroy_process_group()
 
 
-def get_args():
+def setup_parser():
     parser = argparse.ArgumentParser("Incremental signal recognition", add_help=False)
 
     parser.add_argument(
@@ -44,13 +58,13 @@ def get_args():
     # Train parameters
     parser.add_argument(
         "--train_batch_size",
-        default=100,
+        default=128,
         type=int,
         help="Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus",
     )
     parser.add_argument(
         "--test_batch_size",
-        default=100,
+        default=128,
         type=int,
         help="Batch size per GPU (speed up evaluation under few-shot setting)",
     )
@@ -87,7 +101,7 @@ def get_args():
         help="Name of model to train",
     )
     parser.add_argument(
-        "--input_size", default=224 * 224 * 3, type=int, help="Unified input size"
+        "--input_size", default=224*224*3, type=int, help="Unified input size"
     )
 
     # Optimizer parameters
@@ -162,19 +176,7 @@ def get_args():
         "--dist_url", default="env://", help="url used to set up distributed training"
     )
 
-    args = parser.parse_args()
-    if args.config is not None:
-        param = load_json(args.config)
-        args = vars(args)
-        args.update(param)
-        args = argparse.Namespace(**args)
-    return args
-
-
-def load_json(setting_path):
-    with open(setting_path) as f:
-        param = json.load(f)
-    return param
+    return parser
 
 
 if __name__ == "__main__":

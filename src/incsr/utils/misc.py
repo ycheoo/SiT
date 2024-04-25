@@ -22,6 +22,10 @@ import torch
 import torch.distributed as dist
 from torch._six import inf
 
+def load_json(setting_path):
+    with open(setting_path) as f:
+        param = json.load(f)
+    return param
 
 class ConfigEncoder(json.JSONEncoder):
     def default(self, o):

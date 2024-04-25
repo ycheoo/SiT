@@ -1,0 +1,16 @@
+{
+    "dataset": "incsr16",
+    "domains": "r0605u0508_modified",
+    
+    "blr": 0.1,
+    "train_batch_size": 128,
+    "base_epoch": 200,
+    "model_backbone_loc": "finetune/mail/default/0/checkpoint-0.pth",
+
+    "init_cls": 10,
+    "inc_cls": 2,
+
+    "init_inst": 50,
+    "inc_inst": 50,
+    "limit_inst": 200
+}

@@ -1,5 +1,5 @@
 #!/bin/bash
-export CUDA_VISIBLE_DEVICES=1,2,3,4,5
+export CUDA_VISIBLE_DEVICES=1,3,4,5
 
     nproc_per_node=$1
     master_port=$(($RANDOM + 11451))

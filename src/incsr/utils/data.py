@@ -68,117 +68,13 @@ def gen_domains(domain_id, dir_root):
     return dataset
 
 
-class iRADIO88(iData):
-    def __init__(self):
-        self.use_path = True
-        self.domain_classnum = 8
-
-    def download_data(self, seed, limit_inst, domains):
-        root_dir = "/home/heyuchen/data/signal/signal_radio/signal88"
-        train_dataset = []
-        test_dataset = []
-        self.class_order = np.arange(self.domain_classnum * len(domains))
-
-        for domain_id, domain in enumerate(domains):
-            train_dir = os.path.join(root_dir, domain, "train")
-            test_dir = os.path.join(root_dir, domain, "val")
-            train_dataset.extend(gen_domains(domain_id, train_dir))
-            test_dataset.extend(gen_domains(domain_id, test_dir))
-
-        self.train_data, self.train_targets = split_dataset(train_dataset)
-        self.test_data, self.test_targets = split_dataset(test_dataset)
-
-        if not limit_inst == -1:
-            self.train_data, self.train_targets = reduce_inst(
-                seed, limit_inst, self.train_data, self.train_targets, self.class_order
-            )
-
-
-class iRADIO38(iData):
-    def __init__(self):
-        self.use_path = True
-        self.domain_classnum = 8
-
-    def download_data(self, seed, limit_inst, domains):
-        root_dir = "/home/heyuchen/data/signal/signal_radio/signal38"
-        train_dataset = []
-        test_dataset = []
-        self.class_order = np.arange(self.domain_classnum * len(domains))
-
-        for domain_id, domain in enumerate(domains):
-            train_dir = os.path.join(root_dir, domain, "train")
-            test_dir = os.path.join(root_dir, domain, "val")
-            train_dataset.extend(gen_domains(domain_id, train_dir))
-            test_dataset.extend(gen_domains(domain_id, test_dir))
-
-        self.train_data, self.train_targets = split_dataset(train_dataset)
-        self.test_data, self.test_targets = split_dataset(test_dataset)
-
-        if not limit_inst == -1:
-            self.train_data, self.train_targets = reduce_inst(
-                seed, limit_inst, self.train_data, self.train_targets, self.class_order
-            )
-
-
-class iUAV48(iData):
-    def __init__(self):
-        self.use_path = True
-        self.domain_classnum = 8
-
-    def download_data(self, seed, limit_inst, domains):
-        root_dir = "/home/heyuchen/data/signal/signal_uav/signal_uav_npy"
-        train_dataset = []
-        test_dataset = []
-        self.class_order = np.arange(self.domain_classnum * len(domains))
-
-        for domain_id, domain in enumerate(domains):
-            train_dir = os.path.join(root_dir, domain, "train")
-            test_dir = os.path.join(root_dir, domain, "val")
-            train_dataset.extend(gen_domains(domain_id, train_dir))
-            test_dataset.extend(gen_domains(domain_id, test_dir))
-
-        self.train_data, self.train_targets = split_dataset(train_dataset)
-        self.test_data, self.test_targets = split_dataset(test_dataset)
-
-        if not limit_inst == -1:
-            self.train_data, self.train_targets = reduce_inst(
-                seed, limit_inst, self.train_data, self.train_targets, self.class_order
-            )
-
-
-class iSMI78(iData):
-    def __init__(self):
-        self.use_path = True
-        self.domain_classnum = 8
-
-    def download_data(self, seed, limit_inst, domains):
-        root_dir = "/home/heyuchen/data/signal/signal_smi/signal_smi_npy_insert"
-        train_dataset = []
-        test_dataset = []
-        self.class_order = np.arange(self.domain_classnum * len(domains))
-
-        for domain_id, domain in enumerate(domains):
-            train_dir = os.path.join(root_dir, domain, "train")
-            test_dir = os.path.join(root_dir, domain, "val")
-            train_dataset.extend(gen_domains(domain_id, train_dir))
-            test_dataset.extend(gen_domains(domain_id, test_dir))
-
-        self.train_data, self.train_targets = split_dataset(train_dataset)
-        self.test_data, self.test_targets = split_dataset(test_dataset)
-
-        if not limit_inst == -1:
-            self.train_data, self.train_targets = reduce_inst(
-                seed, limit_inst, self.train_data, self.train_targets, self.class_order
-            )
-
-
 class iINCSR16(iData):
     def __init__(self):
         self.use_path = True
         self.domain_classnum = 16
 
     def download_data(self, seed, limit_inst, domains):
-        root_dir = "/home/heyuchen/data/signal/signal_incsr"
+        root_dir = "/mnt/data/heyuchen/data/signal/signal_incsr"
         train_dataset = []
         test_dataset = []
         self.class_order = np.arange(self.domain_classnum * len(domains))

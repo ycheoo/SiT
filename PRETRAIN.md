@@ -6,9 +6,23 @@
 pip install -r requirements.txt
 ```
 
-## [Pretrain](./PRETRAIN.md)
+## Experiments
 
-## [Incsr](./INCSR.md)
+### Pretrain (mae and vit):
+
+```
+./scripts/pretrain/train_{episode}.sh {node} {dataset} {config}
+```
+
+`{episode}` should be be either mae or finetune, 
+where `{dataset}` should be chosen from the name of subfolders from `configs/pretrain/mae` 
+and `{config}` should be chosen from be selected from the json file in the specific subfolder.
+
+### Training procedure
+
+1. **Train mae, e.g., `./scripts/pretrain/train_mae.sh 2 mail default`.**
+2. **Train vit, e.g., `./scripts/pretrain/train_finetune.sh 2 mail default`.**
+3. **In the config file of vit (default.json), the finetune option should be set to specific path of pre-trained model, which can be both mae and vit.**
 
 ## Datasets
 

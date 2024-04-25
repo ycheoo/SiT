@@ -68,7 +68,7 @@ def setup_parser():
     )
 
     parser.add_argument(
-        "--input_size", default=224 * 224 * 3, type=int, help="images input size"
+        "--input_size", default=224*224*3, type=int, help="images input size"
     )
 
     parser.add_argument(
