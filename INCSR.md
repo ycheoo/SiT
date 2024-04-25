@@ -19,7 +19,7 @@ pip install -r requirements.txt
 ./scripts/incsr/train_incsr.sh {node} {dataset} {config}
 ```
 
-where `{dataset}` should be chosen from the name of subfolders from `configs/pretrain/mae` 
+where `{dataset}` should be chosen from the name of subfolders from `configs/incsr` 
 and `{config}` should be chosen from be selected from the json file in the specific subfolder.
 
 ## Datasets

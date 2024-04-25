@@ -15,7 +15,7 @@ pip install -r requirements.txt
 ```
 
 `{episode}` should be be either mae or finetune, 
-where `{dataset}` should be chosen from the name of subfolders from `configs/pretrain/mae` 
+where `{dataset}` should be chosen from the name of subfolders from `configs/pretrain/{episode}` 
 and `{config}` should be chosen from be selected from the json file in the specific subfolder.
 
 ### Training procedure
