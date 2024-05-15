@@ -13,8 +13,8 @@ def random_crop_resize(sample, crop_minlen, input_size):
 
     # if sample is too short (less than crop_minlen)
     if sample.shape[1] < crop_minlen:
-        sample_padded = np.zeros((2, crop_minlen), dtype=np.float32)
-        sample_padded[:, sample.shape[1]] = sample
+        sample_padded = np.zeros((2, crop_minlen), dtype=np.float64)
+        sample_padded[:, :sample.shape[1]] = sample
         sample = sample_padded
     
     # crop
@@ -63,9 +63,10 @@ class MyFolder(DatasetFolder):
 
 def get_dataset(dataset, domains, input_size):
     dir_dict = {
-        "mail": "signal_pretrain",
+     #   "mail": "signal_pretrain",
+        "radar": "radar",
     }
-    root_dir = f"~/data/signal/{dir_dict[dataset]}"
+    root_dir = f"~/data/{dir_dict[dataset]}"
     train_dset = []
     test_dset = []
     for domain in domains:

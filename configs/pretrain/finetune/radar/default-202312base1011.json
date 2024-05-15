@@ -1,0 +1,10 @@
+{
+    "dataset": "radar",
+    "domains": "202312",
+    
+    "blr": 1e-6,
+    "batch_size": 211,
+    "epochs": 100,
+    "nb_classes": 20,
+    "finetune": "finetune/radar/default1011/0/checkpoint-99.pth"
+}

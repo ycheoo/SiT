@@ -1,9 +1,0 @@
-*.gz
-*.tar
-*.log
-*.pyc
-*.npy
-*.pth
-/data
-/logs
-/checkpoints

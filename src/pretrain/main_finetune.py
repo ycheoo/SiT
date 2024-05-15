@@ -27,7 +27,7 @@ def main():
         f"./checkpoints/pretrain/finetune/{args.dataset}/{args.config}/{args.seed}"
     )
     checkpoint_mae = args.finetune
-    args.finetune = f"./checkpoints/pretrain/mae/{checkpoint_mae}"
+    args.finetune = f"./checkpoints/pretrain/{checkpoint_mae}"
 
     init_distributed_mode(args)
     train(args)
@@ -43,6 +43,7 @@ def setup_parser():
         "--config", default="default", type=str, help="Experiment config"
     )
     parser.add_argument("--domains", default="0531", type=str, help="Signal domains")
+    parser.add_argument("--shots", default=-1, type=str, help="Few shot")
 
     parser.add_argument(
         "--batch_size",
