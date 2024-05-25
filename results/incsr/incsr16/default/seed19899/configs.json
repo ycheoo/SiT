@@ -19,7 +19,7 @@
   "limit_inst": 200,
   "local_rank": -1,
   "log_dir": "./logs/incsr/incsr16/default/seed19899",
-  "lr": 0.05,
+  "lr": 0.0390625,
   "method": "incsr",
   "min_lr": 1e-06,
   "model": "incvpt",
@@ -41,7 +41,7 @@
     1
   ],
   "test_batch_size": 128,
-  "train_batch_size": 128,
+  "train_batch_size": 100,
   "tuned_epoch": 50,
   "vpt_type": "deep",
   "weight_decay": 0.0005,

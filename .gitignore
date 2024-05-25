@@ -1,0 +1,10 @@
+*.gz
+*.tar
+*.log
+*.pyc
+*.npy
+*.pth
+/data
+/logs
+/results
+/checkpoints

@@ -2,7 +2,7 @@
     "dataset": "mail",
     "domains": "0531,0601,0602,0603",
     
-    "blr": 1e-5,
+    "blr": 5e-6,
     "batch_size": 512,
     "epochs": 50,
     "finetune": "mail/default/0/checkpoint-10.pth",

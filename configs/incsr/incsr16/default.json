@@ -3,7 +3,7 @@
     "domains": "r0605u0508_modified",
     
     "blr": 0.1,
-    "train_batch_size": 128,
+    "train_batch_size": 100,
     "base_epoch": 200,
     "model_backbone_loc": "finetune/mail/default/0/checkpoint-0.pth",
 
