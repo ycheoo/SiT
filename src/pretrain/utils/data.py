@@ -14,9 +14,10 @@ def random_crop_resize(sample, crop_minlen, input_size):
     # if sample is too short (less than crop_minlen)
     if sample.shape[1] < crop_minlen:
         sample_padded = np.zeros((2, crop_minlen), dtype=np.float32)
-        sample_padded[:, :sample.shape[1]] = sample
+        start_idx = np.random.randint(0, crop_minlen - sample.shape[1] + 1)
+        sample_padded[:, start_idx : start_idx + sample.shape[1]] = sample
         sample = sample_padded
-    
+
     # crop
     crop_size = np.random.randint(crop_minlen, min(input_size, sample.shape[1]) + 1)
     start_idx = np.random.randint(0, sample.shape[1] - crop_size + 1)
@@ -24,25 +25,28 @@ def random_crop_resize(sample, crop_minlen, input_size):
 
     # unified shape
     sample_padded = np.zeros((2, input_size), dtype=np.float32)
-    sample_padded[:, : sample.shape[1]] = sample
+    start_idx = np.random.randint(0, input_size - sample.shape[1] + 1)
+    sample_padded[:, start_idx : start_idx + sample.shape[1]] = sample
     sample = sample_padded
     return sample
 
 
 NPY_EXTENSIONS = ".npy"
 
+ground_classes = ["210", "211", "212", "213", "214", "215", "216", "217"]
+ground_classes.sort()
+ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(ground_classes)}
 
 class MyFolder(DatasetFolder):
-    def __init__(self, root, mode, input_size, dataset_idx=0, domain_classnum=0):
+    def __init__(self, root, mode, input_size, is_mae=False):
         super().__init__(
             root=root,
             loader=np.load,
             extensions=NPY_EXTENSIONS,
         )
         self.mode = mode
+        self.is_mae = is_mae
         self.input_size = input_size
-        self.dataset_idx = dataset_idx
-        self.domain_classnum = domain_classnum
 
     def __len__(self):
         return len(self.samples)
@@ -51,19 +55,23 @@ class MyFolder(DatasetFolder):
         path, target = self.samples[index]
 
         sample = self.loader(path)
-        if self.mode == "train":
+        # For MAE, do not crop
+        if self.mode == "train" and not self.is_mae:
             sample = random_crop_resize(sample, 512, self.input_size)
         else:
-            sample = random_crop_resize(sample, min(len(sample), self.input_size), self.input_size)
+            sample = random_crop_resize(
+                sample, min(len(sample), self.input_size), self.input_size
+            )
         sample = torch.from_numpy(sample)
-        target = self.dataset_idx * self.domain_classnum + target
+        # Specify class id
+        target = ground_class_to_idx[self.classes[target]]
 
         return sample, target
 
 
-def get_dataset(dataset, domains, input_size):
+def get_dataset(dataset, domains, input_size, is_mae=False):
     dir_dict = {
-     #   "mail": "signal_pretrain",
+        "mail": "signal_pretrain",
         "radar": "radar",
     }
     root_dir = f"~/data/{dir_dict[dataset]}"
@@ -73,7 +81,7 @@ def get_dataset(dataset, domains, input_size):
         train_dir = os.path.join(root_dir, domain, "train")
         test_dir = os.path.join(root_dir, domain, "val")
 
-        train_dset.append(MyFolder(train_dir, "train", input_size))
+        train_dset.append(MyFolder(train_dir, "train", input_size, is_mae))
         test_dset.append(MyFolder(test_dir, "test", input_size))
 
     return ConcatDataset(train_dset), ConcatDataset(test_dset)

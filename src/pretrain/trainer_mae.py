@@ -37,7 +37,7 @@ def train(args):
     global_rank = misc.get_rank()
     args.domains = args.domains.split(",")
     dataset_train, dataset_val = get_dataset(
-        args.dataset, args.domains, args.input_size
+        args.dataset, args.domains, args.input_size, is_mae=True
     )
 
     sampler_train = torch.utils.data.DistributedSampler(
