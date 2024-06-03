@@ -1,4 +1,6 @@
 import os
+import random
+from collections import defaultdict
 
 import numpy as np
 import torch
@@ -38,7 +40,7 @@ ground_classes = ["210", "211", "212", "213", "214", "215", "216", "217"]
 # ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(ground_classes)}
 
 class MyFolder(DatasetFolder):
-    def __init__(self, root, mode, input_size, is_mae=False):
+    def __init__(self, root, mode, input_size, is_mae=False, threshold=-1):
         super().__init__(
             root=root,
             loader=np.load,
@@ -46,10 +48,34 @@ class MyFolder(DatasetFolder):
         )
         self.mode = mode
         self.is_mae = is_mae
+        self.threshold = threshold
         self.input_size = input_size
         self.ground_classes = list(filter(lambda x: x in self.classes, ground_classes))
         self.ground_classes.sort()
         self.ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(self.ground_classes)}
+        
+        if self.mode == "train" and self.threshold != -1:
+            self.samples = self.filter_samples()
+            
+    def filter_samples(self):
+        split_dict = defaultdict(list)
+        
+        for item in self.samples:
+            path, target = item
+            split_dict[target].append(item)
+
+        filtered_dict = {}
+        for key, value_list in split_dict.items():
+            if len(value_list) > self.threshold:
+                filtered_dict[key] = random.sample(value_list, self.threshold)
+            else:
+                filtered_dict[key] = value_list
+        
+        merged_list = []
+        for value_list in filtered_dict.values():
+            merged_list.extend(value_list)
+        
+        return merged_list
 
     def __len__(self):
         return len(self.samples)
@@ -72,7 +98,7 @@ class MyFolder(DatasetFolder):
         return sample, target
 
 
-def get_dataset(dataset, domains, input_size, is_mae=False):
+def get_dataset(dataset, domains, input_size, is_mae=False, threshold=-1):
     dir_dict = {
         "mail": "signal_pretrain",
         "radar": "radar",
@@ -84,7 +110,7 @@ def get_dataset(dataset, domains, input_size, is_mae=False):
         train_dir = os.path.join(root_dir, domain, "train")
         test_dir = os.path.join(root_dir, domain, "val")
 
-        train_dset.append(MyFolder(train_dir, "train", input_size, is_mae))
+        train_dset.append(MyFolder(train_dir, "train", input_size, is_mae, threshold))
         test_dset.append(MyFolder(test_dir, "test", input_size))
 
     return ConcatDataset(train_dset), ConcatDataset(test_dset)
