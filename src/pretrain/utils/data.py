@@ -34,8 +34,8 @@ def random_crop_resize(sample, crop_minlen, input_size):
 NPY_EXTENSIONS = ".npy"
 
 ground_classes = ["210", "211", "212", "213", "214", "215", "216", "217"]
-ground_classes.sort()
-ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(ground_classes)}
+# ground_classes.sort()
+# ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(ground_classes)}
 
 class MyFolder(DatasetFolder):
     def __init__(self, root, mode, input_size, is_mae=False):
@@ -47,6 +47,9 @@ class MyFolder(DatasetFolder):
         self.mode = mode
         self.is_mae = is_mae
         self.input_size = input_size
+        self.ground_classes = list(filter(lambda x: x in self.classes, ground_classes))
+        self.ground_classes.sort()
+        self.ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(self.ground_classes)}
 
     def __len__(self):
         return len(self.samples)
@@ -64,7 +67,7 @@ class MyFolder(DatasetFolder):
             )
         sample = torch.from_numpy(sample)
         # Specify class id
-        target = ground_class_to_idx[self.classes[target]]
+        target = self.ground_class_to_idx[self.classes[target]]
 
         return sample, target
 
