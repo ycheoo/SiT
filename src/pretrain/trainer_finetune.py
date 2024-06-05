@@ -24,7 +24,7 @@ def train(args):
     global_rank = misc.get_rank()
 
     args.domains = args.domains.split(",")
-    dataset_train, dataset_val = get_dataset(
+    class_mask, dataset_train, dataset_val = get_dataset(
         args.dataset, args.domains, args.input_size, threshold=args.threshold
     )
 
@@ -197,6 +197,7 @@ def train(args):
             mixup_fn,
             log_writer=log_writer,
             args=args,
+            class_mask=class_mask
         )
         if args.output_dir and (epoch % 10 == 0 or epoch + 1 == args.epochs):
             misc.save_model(
@@ -208,7 +209,7 @@ def train(args):
                 epoch=epoch,
             )
 
-        test_stats = evaluate(data_loader_val, model, device)
+        test_stats = evaluate(data_loader_val, model, device, class_mask)
         print(
             f"Accuracy of the network on the {len(dataset_val)} test images: {test_stats['acc1']:.1f}%"
         )

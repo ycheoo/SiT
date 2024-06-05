@@ -36,8 +36,7 @@ def random_crop_resize(sample, crop_minlen, input_size):
 NPY_EXTENSIONS = ".npy"
 
 ground_classes = ["210", "211", "212", "213", "214", "215", "216", "217"]
-# ground_classes.sort()
-# ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(ground_classes)}
+ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(ground_classes)}
 
 class MyFolder(DatasetFolder):
     def __init__(self, root, mode, input_size, is_mae=False, threshold=-1):
@@ -50,9 +49,6 @@ class MyFolder(DatasetFolder):
         self.is_mae = is_mae
         self.threshold = threshold
         self.input_size = input_size
-        self.ground_classes = list(filter(lambda x: x in self.classes, ground_classes))
-        self.ground_classes.sort()
-        self.ground_class_to_idx = {cls_name: i for i, cls_name in enumerate(self.ground_classes)}
         
         if self.mode == "train" and self.threshold != -1:
             self.samples = self.filter_samples()
@@ -77,6 +73,9 @@ class MyFolder(DatasetFolder):
         
         return merged_list
 
+    def get_classes(self):
+        return [ground_class_to_idx[target] for target in self.classes]
+
     def __len__(self):
         return len(self.samples)
 
@@ -93,7 +92,7 @@ class MyFolder(DatasetFolder):
             )
         sample = torch.from_numpy(sample)
         # Specify class id
-        target = self.ground_class_to_idx[self.classes[target]]
+        target = ground_class_to_idx[self.classes[target]]
 
         return sample, target
 
@@ -104,13 +103,25 @@ def get_dataset(dataset, domains, input_size, is_mae=False, threshold=-1):
         "radar": "radar",
     }
     root_dir = f"~/data/{dir_dict[dataset]}"
-    train_dset = []
-    test_dset = []
+    train_datasets = []
+    if not is_mae:
+        test_datasets = []
+        datasets_classes = []
+
     for domain in domains:
         train_dir = os.path.join(root_dir, domain, "train")
-        test_dir = os.path.join(root_dir, domain, "val")
+        train_dataset = MyFolder(train_dir, "train", input_size, is_mae, threshold)
+        train_datasets.append(train_dataset)
 
-        train_dset.append(MyFolder(train_dir, "train", input_size, is_mae, threshold))
-        test_dset.append(MyFolder(test_dir, "test", input_size))
-
-    return ConcatDataset(train_dset), ConcatDataset(test_dset)
+        if not is_mae:
+            test_dir = os.path.join(root_dir, domain, "val")
+            test_dataset = MyFolder(test_dir, "test", input_size)
+            test_datasets.append(test_dataset)
+            datasets_classes.extend(test_dataset.get_classes())
+    
+    if is_mae:
+        return ConcatDataset(train_datasets), ConcatDataset(test_datasets)
+    else:
+        datasets_classes = list(set(datasets_classes))
+        class_mask = [target for target in range(len(ground_classes)) if target not in datasets_classes]
+        return class_mask, ConcatDataset(train_datasets), ConcatDataset(test_datasets)

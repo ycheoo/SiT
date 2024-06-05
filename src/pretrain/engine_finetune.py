@@ -32,6 +32,7 @@ def train_one_epoch(
     mixup_fn: Optional[Mixup] = None,
     log_writer=None,
     args=None,
+    class_mask=[]
 ):
     model.train(True)
     metric_logger = misc.MetricLogger(delimiter="  ")
@@ -63,6 +64,7 @@ def train_one_epoch(
 
         with torch.cuda.amp.autocast():
             outputs = model(samples)
+            outputs[:, class_mask] = float("-inf")
             loss = criterion(outputs, targets)
 
         loss_value = loss.item()
@@ -110,7 +112,7 @@ def train_one_epoch(
 
 
 @torch.no_grad()
-def evaluate(data_loader, model, device):
+def evaluate(data_loader, model, device, class_mask=[]):
     criterion = torch.nn.CrossEntropyLoss()
 
     metric_logger = misc.MetricLogger(delimiter="  ")
@@ -125,12 +127,13 @@ def evaluate(data_loader, model, device):
         images = images.to(device, non_blocking=True)
         target = target.to(device, non_blocking=True)
 
-        # compute output
+        # compute outputs
         with torch.cuda.amp.autocast():
-            output = model(images)
-            loss = criterion(output, target)
+            outputs = model(images)
+            outputs[:, class_mask] = float("-inf")
+            loss = criterion(outputs, target)
 
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        acc1, acc5 = accuracy(outputs, target, topk=(1, 5))
 
         batch_size = images.shape[0]
         metric_logger.update(loss=loss.item())
